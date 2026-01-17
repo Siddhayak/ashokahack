@@ -1,16 +1,40 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS } from '../constants/theme';
 
-const CategoryItem = ({ category, isSelected, onPress }) => {
+// Placeholder images - replace with actual images later
+const categoryImages = {
+  breakfast: null, // Will be: require('../../assets/images/categories/breakfast.png')
+  dinner: null,    // Will be: require('../../assets/images/categories/dinner.png')
+  grocery: null,   // Will be: require('../../assets/images/categories/grocery.png')
+  dessert: null,   // Will be: require('../../assets/images/categories/dessert.png')
+};
+
+// Placeholder illustrations using emoji for now
+const categoryEmojis = {
+  breakfast: '🥐',
+  dinner: '🥡',
+  grocery: '🥬',
+  dessert: '🍰',
+  desserts: '🍰', // alias for backwards compatibility
+};
+
+const CategoryCard = ({ category, isSelected, onPress }) => {
+  const image = categoryImages[category.id];
+  const emoji = categoryEmojis[category.id] || '🍽️';
+  
   return (
     <TouchableOpacity
-      style={[styles.categoryItem, isSelected && styles.categoryItemSelected]}
+      style={[styles.categoryCard, isSelected && styles.categoryCardSelected]}
       onPress={() => onPress(category.id)}
       activeOpacity={0.7}
     >
-      <View style={[styles.iconContainer, isSelected && styles.iconContainerSelected]}>
-        <Text style={styles.icon}>{category.icon}</Text>
+      <View style={styles.imageContainer}>
+        {image ? (
+          <Image source={image} style={styles.categoryImage} resizeMode="contain" />
+        ) : (
+          <Text style={styles.placeholderEmoji}>{emoji}</Text>
+        )}
       </View>
       <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
         {category.name}
@@ -28,7 +52,7 @@ const CategoryFilter = ({ categories, selectedCategory, onSelectCategory }) => {
         contentContainerStyle={styles.scrollContent}
       >
         {categories.map((category) => (
-          <CategoryItem
+          <CategoryCard
             key={category.id}
             category={category}
             isSelected={selectedCategory === category.id}
@@ -46,38 +70,46 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: SPACING.lg,
+    gap: SPACING.md,
   },
-  categoryItem: {
-    alignItems: 'center',
-    marginRight: SPACING.lg,
-  },
-  categoryItemSelected: {},
-  iconContainer: {
-    width: 64,
-    height: 64,
+  categoryCard: {
+    width: 85,
+    height: 110,
     borderRadius: BORDER_RADIUS.lg,
     backgroundColor: COLORS.cardBackground,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.sm,
+    justifyContent: 'flex-end',
+    paddingBottom: SPACING.sm,
     borderWidth: 1,
     borderColor: COLORS.border,
+    overflow: 'hidden',
   },
-  iconContainerSelected: {
-    backgroundColor: COLORS.primaryAccent,
+  categoryCardSelected: {
     borderColor: COLORS.primaryAccent,
+    borderWidth: 2,
   },
-  icon: {
-    fontSize: 28,
+  imageContainer: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryImage: {
+    width: 60,
+    height: 60,
+  },
+  placeholderEmoji: {
+    fontSize: 40,
   },
   categoryText: {
     fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
+    color: COLORS.primaryAccent,
+    fontWeight: '600',
+    marginTop: SPACING.xs,
   },
   categoryTextSelected: {
     color: COLORS.primaryAccent,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
 

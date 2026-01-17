@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES } from '../constants/theme';
-import { LocationHeader, CategoryFilter, RestaurantCard } from '../components';
+import { LocationHeader, CategoryFilter, RestaurantCard, SearchBar } from '../components';
+import BottomTabBar from '../components/BottomTabBar';
 import {
   categories,
   userLocation,
@@ -12,20 +13,20 @@ import {
   getRestaurantsByCategory,
 } from '../data/mockData';
 
-const SectionTitle = ({ title, onSeeAll }) => (
+const SectionHeader = ({ title, onSeeAll }) => (
   <View style={styles.sectionHeader}>
     <Text style={styles.sectionTitle}>{title}</Text>
     {onSeeAll && (
-      <Text style={styles.seeAllText} onPress={onSeeAll}>
-        See all
-      </Text>
+      <TouchableOpacity onPress={onSeeAll}>
+        <Text style={styles.seeAllText}>See all</Text>
+      </TouchableOpacity>
     )}
   </View>
 );
 
-const RestaurantSection = ({ title, restaurants: restaurantList, onRestaurantPress }) => (
+const RestaurantSection = ({ title, restaurants: restaurantList, onRestaurantPress, onSeeAll }) => (
   <View style={styles.section}>
-    <SectionTitle title={title} />
+    <SectionHeader title={title} onSeeAll={onSeeAll} />
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
@@ -44,6 +45,8 @@ const RestaurantSection = ({ title, restaurants: restaurantList, onRestaurantPre
 
 const HomeScreen = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('explore');
 
   const filteredRestaurants = useMemo(() => {
     return getRestaurantsByCategory(restaurants, selectedCategory);
@@ -73,6 +76,19 @@ const HomeScreen = ({ navigation }) => {
     console.log('Location pressed');
   };
 
+  const handleFilterPress = () => {
+    console.log('Filter pressed');
+  };
+
+  const handleSeeAll = (section) => {
+    console.log(`See all ${section}`);
+  };
+
+  const handleTabPress = (tabId) => {
+    setActiveTab(tabId);
+    console.log(`Tab pressed: ${tabId}`);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
@@ -82,43 +98,62 @@ const HomeScreen = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Location Header */}
         <LocationHeader
           location={userLocation}
           onPress={handleLocationPress}
         />
 
+        {/* Category Filter */}
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
           onSelectCategory={handleCategorySelect}
         />
 
+        {/* Search Bar */}
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onFilterPress={handleFilterPress}
+        />
+
+        {/* Most Relevant Section */}
         {relevantRestaurants.length > 0 && (
           <RestaurantSection
-            title="Most Relevant to You"
+            title="Most Relevant"
             restaurants={relevantRestaurants}
             onRestaurantPress={handleRestaurantPress}
+            onSeeAll={() => handleSeeAll('relevant')}
           />
         )}
 
+        {/* Most Popular Section */}
         {popularRestaurants.length > 0 && (
           <RestaurantSection
-            title="Most Popular"
+            title="Most Popular Near You"
             restaurants={popularRestaurants}
             onRestaurantPress={handleRestaurantPress}
+            onSeeAll={() => handleSeeAll('popular')}
           />
         )}
 
+        {/* Newly Added Section */}
         {newlyAddedRestaurants.length > 0 && (
           <RestaurantSection
-            title="Newly Added"
+            title="New Added Rescue Bags"
             restaurants={newlyAddedRestaurants}
             onRestaurantPress={handleRestaurantPress}
+            onSeeAll={() => handleSeeAll('new')}
           />
         )}
 
+        {/* Bottom padding for tab bar */}
         <View style={styles.bottomPadding} />
       </ScrollView>
+
+      {/* Bottom Tab Bar */}
+      <BottomTabBar activeTab={activeTab} onTabPress={handleTabPress} />
     </View>
   );
 };
@@ -132,10 +167,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: SPACING.xxxl,
+    paddingTop: SPACING.xxxl + SPACING.md,
   },
   section: {
-    marginTop: SPACING.lg,
+    marginTop: SPACING.xl,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -146,7 +181,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: FONT_SIZES.xl,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.textPrimary,
   },
   seeAllText: {
@@ -158,7 +193,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
   },
   bottomPadding: {
-    height: SPACING.xxxl,
+    height: 100, // Space for bottom tab bar
   },
 });
 

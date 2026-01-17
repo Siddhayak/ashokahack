@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { COLORS, SPACING, FONT_SIZES, BORDER_RADIUS, SHADOWS } from '../constants/theme';
 import { formatPickupTime } from '../data/mockData';
 
 const RestaurantCard = ({ restaurant, onPress, variant = 'default' }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+  
   const firstBag = restaurant.bagOptions?.[0];
   const pickupTimeDisplay = firstBag 
     ? formatPickupTime(firstBag.pickupStart, firstBag.pickupEnd)
@@ -12,6 +14,15 @@ const RestaurantCard = ({ restaurant, onPress, variant = 'default' }) => {
   const lowestPrice = restaurant.bagOptions 
     ? Math.min(...restaurant.bagOptions.map(b => b.price))
     : 0;
+  
+  const originalPrice = restaurant.bagOptions 
+    ? Math.min(...restaurant.bagOptions.map(b => b.originalPrice))
+    : 0;
+
+  const handleFavoritePress = (e) => {
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+  };
 
   return (
     <TouchableOpacity
@@ -19,46 +30,45 @@ const RestaurantCard = ({ restaurant, onPress, variant = 'default' }) => {
       onPress={() => onPress(restaurant)}
       activeOpacity={0.8}
     >
+      {/* Image with overlays */}
       <View style={[styles.imageContainer, variant === 'large' && styles.imageContainerLarge]}>
         <Image
           source={{ uri: restaurant.image }}
           style={styles.image}
           resizeMode="cover"
         />
-        {restaurant.vegOnly && (
-          <View style={styles.vegBadge}>
-            <Text style={styles.vegText}>🌱</Text>
-          </View>
-        )}
+        
+        {/* Price Badge - Top Left */}
+        <View style={styles.priceBadge}>
+          <Text style={styles.originalPrice}>₹{originalPrice}</Text>
+          <Text style={styles.discountedPrice}>₹{lowestPrice}</Text>
+        </View>
+        
+        {/* Favorite Heart - Top Right */}
+        <TouchableOpacity 
+          style={styles.favoriteButton} 
+          onPress={handleFavoritePress}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.heartIcon}>{isFavorite ? '💗' : '🤍'}</Text>
+        </TouchableOpacity>
       </View>
       
+      {/* Content */}
       <View style={styles.contentContainer}>
-        <Text style={styles.restaurantName} numberOfLines={1}>
-          {restaurant.name}
-        </Text>
-        
-        <View style={styles.infoRow}>
-          <Text style={styles.distance}>{restaurant.distance} km</Text>
-          <Text style={styles.separator}>•</Text>
-          <Text style={styles.rating}>⭐ {restaurant.rating}</Text>
-          {restaurant.reviewCount && (
-            <>
-              <Text style={styles.separator}>•</Text>
-              <Text style={styles.reviews}>{restaurant.reviewCount} reviews</Text>
-            </>
-          )}
-        </View>
-        
-        <View style={styles.bottomRow}>
-          <Text style={styles.pickupTime}>Pickup: {pickupTimeDisplay}</Text>
-        </View>
-
-        {variant === 'large' && (
-          <View style={styles.priceRow}>
-            <Text style={styles.fromText}>From</Text>
-            <Text style={styles.price}>₹{lowestPrice}</Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.restaurantName} numberOfLines={1}>
+            {restaurant.name}
+          </Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.ratingText}>{restaurant.rating}</Text>
+            <Text style={styles.starIcon}>★</Text>
           </View>
-        )}
+        </View>
+        
+        <Text style={styles.infoText}>
+          {restaurant.distance} kms  |  Pickup: {pickupTimeDisplay.toLowerCase()}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -66,7 +76,7 @@ const RestaurantCard = ({ restaurant, onPress, variant = 'default' }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: 200,
+    width: 170,
     backgroundColor: COLORS.cardBackground,
     borderRadius: BORDER_RADIUS.lg,
     overflow: 'hidden',
@@ -74,84 +84,88 @@ const styles = StyleSheet.create({
     ...SHADOWS.md,
   },
   containerLarge: {
-    width: 280,
+    width: 200,
   },
   imageContainer: {
-    height: 120,
+    height: 100,
     position: 'relative',
+    backgroundColor: COLORS.border,
   },
   imageContainerLarge: {
-    height: 150,
+    height: 120,
   },
   image: {
     width: '100%',
     height: '100%',
   },
-  vegBadge: {
+  priceBadge: {
+    position: 'absolute',
+    top: SPACING.sm,
+    left: SPACING.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.primaryAccent,
+    borderRadius: BORDER_RADIUS.full,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  originalPrice: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.background,
+    textDecorationLine: 'line-through',
+    marginRight: SPACING.xs,
+    opacity: 0.8,
+  },
+  discountedPrice: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '700',
+    color: COLORS.background,
+  },
+  favoriteButton: {
     position: 'absolute',
     top: SPACING.sm,
     right: SPACING.sm,
-    backgroundColor: COLORS.background,
-    borderRadius: BORDER_RADIUS.full,
-    padding: 4,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  vegText: {
-    fontSize: 14,
+  heartIcon: {
+    fontSize: 18,
   },
   contentContainer: {
-    padding: SPACING.md,
+    padding: SPACING.sm,
   },
-  restaurantName: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
-  },
-  infoRow: {
+  nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: SPACING.xs,
-    flexWrap: 'wrap',
   },
-  distance: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-  },
-  separator: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
-    marginHorizontal: SPACING.xs,
-  },
-  rating: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-  },
-  reviews: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
-  },
-  bottomRow: {
-    marginTop: SPACING.xs,
-  },
-  pickupTime: {
-    fontSize: FONT_SIZES.xs,
-    color: COLORS.primaryAccent,
-    fontWeight: '500',
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: SPACING.sm,
-  },
-  fromText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textMuted,
+  restaurantName: {
+    flex: 1,
+    fontSize: FONT_SIZES.md,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
     marginRight: SPACING.xs,
   },
-  price: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: '700',
-    color: COLORS.primaryAccent,
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: '600',
+    color: COLORS.starActive,
+    marginRight: 2,
+  },
+  starIcon: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.starActive,
+  },
+  infoText: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
   },
 });
 
