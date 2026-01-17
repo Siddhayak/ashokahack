@@ -88,18 +88,19 @@ export default function DashboardPage() {
                             <CardTitle className="text-base font-medium text-white">Revenue (Last 7 Days)</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
-                            <div className="h-40 flex items-end justify-between gap-3">
+                            <div className="flex items-end justify-between gap-2" style={{ height: '160px' }}>
                                 {mockDailyStats.map((stat) => {
                                     const maxRevenue = Math.max(...mockDailyStats.map(s => s.revenue));
-                                    const height = (stat.revenue / maxRevenue) * 100;
+                                    const heightPercent = (stat.revenue / maxRevenue) * 100;
+                                    const barHeight = Math.max((heightPercent / 100) * 120, 8); // 120px max bar height, 8px min
                                     return (
-                                        <div key={stat.date} className="flex-1 flex flex-col items-center gap-2">
-                                            <span className="text-xs text-muted-foreground">
-                                                {formatCurrency(stat.revenue).replace('₹', '')}
+                                        <div key={stat.date} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
+                                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                                ₹{stat.revenue.toLocaleString()}
                                             </span>
                                             <div
-                                                className="w-full bg-gradient-to-t from-leaf-dark to-accent rounded-md transition-all hover:opacity-80"
-                                                style={{ height: `${height}%`, minHeight: '8px' }}
+                                                className="w-full bg-gradient-to-t from-leaf-dark to-accent rounded-md transition-all hover:opacity-80 hover:scale-105"
+                                                style={{ height: `${barHeight}px` }}
                                             />
                                             <span className="text-xs text-muted-foreground">
                                                 {new Date(stat.date).toLocaleDateString('en-IN', { weekday: 'short' })}

@@ -51,6 +51,9 @@
   body {
     @apply bg-spare-bg text-foreground font-sans antialiased;
   }
+  button, [role="button"] {
+    cursor: pointer;
+  }
 }
 
 /* Custom scrollbar */

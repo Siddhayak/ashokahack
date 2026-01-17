@@ -97,7 +97,6 @@ export default function LoginPage() {
                     </div>
                     <h1 className="text-3xl font-bold text-accent">Spare</h1>
                     <p className="text-lg text-pink mt-1">Baker&apos;s Oven</p>
-                    <p className="text-sm text-muted-foreground mt-2">Sign in to your restaurant dashboard</p>
                 </div>
 
                 <Card className="bg-spare-bg-light/80 backdrop-blur-sm border-white/10">
