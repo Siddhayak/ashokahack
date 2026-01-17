@@ -1,21 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, LogIn, ChevronDown, ChevronUp } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
-// Mock credentials
-const MOCK_CREDENTIALS = {
+// Mock credentials for display
+const SAMPLE_CREDENTIALS = {
     email: "admin@bakersoven.in",
     password: "spare123"
 };
 
 export default function LoginPage() {
     const router = useRouter();
+    const { login, isAuthenticated, isLoading: authLoading } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -23,28 +25,46 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (!authLoading && isAuthenticated) {
+            router.push("/");
+        }
+    }, [isAuthenticated, authLoading, router]);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        const result = await login(email, password);
 
-        if (email === MOCK_CREDENTIALS.email && password === MOCK_CREDENTIALS.password) {
-            // Store auth state (in real app, this would be handled by better-auth)
-            localStorage.setItem("isAuthenticated", "true");
+        if (result.success) {
             router.push("/");
         } else {
-            setError("Invalid email or password");
+            setError(result.error || "Login failed");
         }
         setLoading(false);
     };
 
     const fillCredentials = () => {
-        setEmail(MOCK_CREDENTIALS.email);
-        setPassword(MOCK_CREDENTIALS.password);
+        setEmail(SAMPLE_CREDENTIALS.email);
+        setPassword(SAMPLE_CREDENTIALS.password);
     };
+
+    // Show nothing while checking auth
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-spare-bg flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    // Don't render if already authenticated (will redirect)
+    if (isAuthenticated) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen bg-spare-bg flex items-center justify-center p-4">
@@ -57,26 +77,27 @@ export default function LoginPage() {
             <div className="w-full max-w-md relative z-10">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-pink to-accent/50 mb-4">
-                        <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                    <div className="inline-flex items-center justify-center mb-4">
+                        <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
                             <path
                                 d="M8 12C8 10 10 8 12 8H28C30 8 32 10 32 12V32C32 34 30 36 28 36H12C10 36 8 34 8 32V12Z"
-                                fill="#0D3B2E"
+                                fill="#E88BC3"
                             />
                             <path
                                 d="M14 8V6C14 4 16 2 20 2C24 2 26 4 26 6V8"
-                                stroke="#0D3B2E"
+                                stroke="#E88BC3"
                                 strokeWidth="3"
                                 strokeLinecap="round"
                             />
                             <path
                                 d="M20 28C20 28 14 22 14 18C14 15 16 14 18 14C19 14 20 15 20 16C20 15 21 14 22 14C24 14 26 15 26 18C26 22 20 28 20 28Z"
-                                fill="#B8E03F"
+                                fill="#0D3B2E"
                             />
                         </svg>
                     </div>
-                    <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-                    <p className="text-muted-foreground mt-1">Sign in to your restaurant dashboard</p>
+                    <h1 className="text-3xl font-bold text-accent">Spare</h1>
+                    <p className="text-lg text-pink mt-1">Baker&apos;s Oven</p>
+                    <p className="text-sm text-muted-foreground mt-2">Sign in to your restaurant dashboard</p>
                 </div>
 
                 <Card className="bg-spare-bg-light/80 backdrop-blur-sm border-white/10">
@@ -159,8 +180,8 @@ export default function LoginPage() {
                             {showCredentials && (
                                 <div className="mt-3 p-3 rounded-lg bg-spare-bg/50 border border-pink/20">
                                     <div className="text-xs space-y-1 text-muted-foreground">
-                                        <p><span className="text-pink">Email:</span> {MOCK_CREDENTIALS.email}</p>
-                                        <p><span className="text-pink">Password:</span> {MOCK_CREDENTIALS.password}</p>
+                                        <p><span className="text-pink">Email:</span> {SAMPLE_CREDENTIALS.email}</p>
+                                        <p><span className="text-pink">Password:</span> {SAMPLE_CREDENTIALS.password}</p>
                                     </div>
                                     <Button
                                         type="button"

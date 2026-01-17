@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/AuthProvider";
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -11,9 +12,6 @@ import {
     Settings,
     LogOut
 } from "lucide-react";
-
-// Restaurant name - would come from context/auth in real app
-const RESTAURANT_NAME = "Baker's Oven";
 
 const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -24,6 +22,10 @@ const navItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const { user, logout } = useAuth();
+
+    // Get restaurant name from user or use default
+    const restaurantName = user?.restaurant || "Baker's Oven";
 
     return (
         <aside className="fixed left-0 top-0 z-50 h-screen w-64 border-r border-white/5 bg-spare-bg-dark flex flex-col">
@@ -48,7 +50,7 @@ export function Sidebar() {
                     </svg>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                    <span className="text-lg font-bold text-accent truncate">{RESTAURANT_NAME}</span>
+                    <span className="text-lg font-bold text-accent truncate">{restaurantName}</span>
                     <span className="text-xs text-muted-foreground">Powered by Spare</span>
                 </div>
             </div>
@@ -80,7 +82,10 @@ export function Sidebar() {
 
             {/* Footer */}
             <div className="p-4 border-t border-white/5">
-                <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all text-sm font-medium">
+                <button
+                    onClick={logout}
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all text-sm font-medium"
+                >
                     <LogOut className="w-5 h-5" />
                     <span>Logout</span>
                 </button>

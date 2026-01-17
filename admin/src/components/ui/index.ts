@@ -1,18 +1,18 @@
 // UI Components barrel export
-export { Button } from "./Button";
-export type { ButtonProps } from "./Button";
+export { Button } from "./button";
+export type { ButtonProps } from "./button";
 
-export { Badge, StatusBadge } from "./Badge";
-export type { BadgeProps, StatusBadgeProps } from "./Badge";
+export { Badge, StatusBadge } from "./badge";
+export type { BadgeProps, StatusBadgeProps } from "./badge";
 
-export { Card, StatCard } from "./Card";
-export type { CardProps, StatCardProps } from "./Card";
+export { Card, StatCard } from "./card";
+export type { CardProps, StatCardProps } from "./card";
 
 export { DataTable } from "./DataTable";
 export type { DataTableProps, Column } from "./DataTable";
 
-export { Input, SearchInput } from "./Input";
-export type { InputProps, SearchInputProps } from "./Input";
+export { Input, SearchInput } from "./input";
+export type { InputProps, SearchInputProps } from "./input";
 
 export { Modal, ConfirmDialog } from "./Modal";
 export type { ModalProps, ConfirmDialogProps } from "./Modal";
