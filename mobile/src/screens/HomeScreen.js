@@ -88,9 +88,18 @@ const HomeContent = ({
       {(searchQuery.length > 0 || selectedCategory) ? (
         // Grid View for Search/Category Results
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { marginLeft: SPACING.lg, marginBottom: SPACING.md }]}>
-            {searchQuery ? 'Search Results' : 'Available Restaurants'}
-          </Text>
+          <View style={{ marginLeft: SPACING.lg, marginBottom: SPACING.md }}>
+            <Text style={styles.sectionTitle}>
+              {searchQuery ? 'Search Results' : 'Available Restaurants'}
+            </Text>
+            {selectedCategory && !searchQuery && (
+              <Text style={styles.categorySubtitle}>
+                in <Text style={{ color: COLORS.primaryAccent, fontWeight: '700' }}>
+                  {categories.find(c => c.id === selectedCategory)?.name}
+                </Text>
+              </Text>
+            )}
+          </View>
           {allFilteredRestaurants.length > 0 ? (
             <View style={styles.gridContainer}>
               {allFilteredRestaurants.map((restaurant) => (
@@ -159,7 +168,7 @@ const HomeScreen = ({ navigation }) => {
 
     // 1. Filter by Category
     if (selectedCategory) {
-      result = result.filter(r => r.categoryId === selectedCategory);
+      result = result.filter(r => r.category === selectedCategory);
     }
 
     // 2. Filter by Search Query
@@ -295,6 +304,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Saans',
     color: COLORS.textSecondary,
     fontSize: FONT_SIZES.md,
+  },
+  categorySubtitle: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textSecondary,
+    fontFamily: 'Saans',
+    marginTop: 2,
   },
 });
 
