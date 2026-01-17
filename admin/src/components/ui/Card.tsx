@@ -1,72 +1,76 @@
-"use client";
+import * as React from "react"
 
-import React from "react";
-import styles from "./Card.module.css";
+import { cn } from "@/lib/utils"
 
-export interface CardProps {
-    children: React.ReactNode;
-    className?: string;
-    padding?: "none" | "sm" | "md" | "lg";
-    hover?: boolean;
-    onClick?: () => void;
-}
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow",
+      className
+    )}
+    {...props}
+  />
+))
+Card.displayName = "Card"
 
-export const Card: React.FC<CardProps> = ({
-    children,
-    className = "",
-    padding = "md",
-    hover = false,
-    onClick,
-}) => {
-    return (
-        <div
-            className={`${styles.card} ${styles[`padding-${padding}`]} ${hover ? styles.hover : ""} ${className}`}
-            onClick={onClick}
-            role={onClick ? "button" : undefined}
-            tabIndex={onClick ? 0 : undefined}
-        >
-            {children}
-        </div>
-    );
-};
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+))
+CardHeader.displayName = "CardHeader"
 
-// Stat Card - Used for dashboard summary cards
-export interface StatCardProps {
-    title: string;
-    value: string | number;
-    change?: number;
-    changeLabel?: string;
-    icon?: React.ReactNode;
-    iconColor?: "accent" | "pink" | "success" | "warning" | "info";
-}
+const CardTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("font-semibold leading-none tracking-tight", className)}
+    {...props}
+  />
+))
+CardTitle.displayName = "CardTitle"
 
-export const StatCard: React.FC<StatCardProps> = ({
-    title,
-    value,
-    change,
-    changeLabel = "vs last period",
-    icon,
-    iconColor = "accent",
-}) => {
-    const isPositive = change !== undefined && change >= 0;
+const CardDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+CardDescription.displayName = "CardDescription"
 
-    return (
-        <Card className={styles.statCard}>
-            <div className={styles.statHeader}>
-                <span className={styles.statTitle}>{title}</span>
-                {icon && (
-                    <div className={`${styles.statIcon} ${styles[`icon-${iconColor}`]}`}>
-                        {icon}
-                    </div>
-                )}
-            </div>
-            <div className={styles.statValue}>{value}</div>
-            {change !== undefined && (
-                <div className={`${styles.statChange} ${isPositive ? styles.positive : styles.negative}`}>
-                    <span>{isPositive ? "↑" : "↓"} {Math.abs(change)}%</span>
-                    <span className={styles.changeLabel}>{changeLabel}</span>
-                </div>
-            )}
-        </Card>
-    );
-};
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+))
+CardContent.displayName = "CardContent"
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+))
+CardFooter.displayName = "CardFooter"
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

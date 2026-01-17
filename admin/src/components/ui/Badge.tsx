@@ -1,58 +1,36 @@
-"use client";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
 
-import React from "react";
-import styles from "./Badge.module.css";
+import { cn } from "@/lib/utils"
 
-export interface BadgeProps {
-    children: React.ReactNode;
-    variant?: "success" | "warning" | "error" | "info" | "neutral" | "pink";
-    size?: "sm" | "md";
-    dot?: boolean;
+const badgeVariants = cva(
+  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+        outline: "text-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  )
 }
 
-export const Badge: React.FC<BadgeProps> = ({
-    children,
-    variant = "neutral",
-    size = "md",
-    dot = false,
-}) => {
-    return (
-        <span className={`${styles.badge} ${styles[variant]} ${styles[size]}`}>
-            {dot && <span className={styles.dot} />}
-            {children}
-        </span>
-    );
-};
-
-// Status Badge - Automatically maps status strings to variants
-export interface StatusBadgeProps {
-    status: string;
-    size?: "sm" | "md";
-}
-
-const statusVariantMap: Record<string, BadgeProps["variant"]> = {
-    active: "success",
-    inactive: "neutral",
-    pending: "warning",
-    suspended: "error",
-    banned: "error",
-    available: "success",
-    sold_out: "info",
-    expired: "neutral",
-    cancelled: "error",
-    reserved: "warning",
-    confirmed: "info",
-    picked_up: "success",
-    no_show: "error",
-};
-
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = "md" }) => {
-    const variant = statusVariantMap[status] || "neutral";
-    const label = status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-
-    return (
-        <Badge variant={variant} size={size} dot>
-            {label}
-        </Badge>
-    );
-};
+export { Badge, badgeVariants }

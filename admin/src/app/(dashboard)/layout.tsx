@@ -1,5 +1,6 @@
+"use client";
+
 import { Sidebar } from "@/components/Sidebar";
-import styles from "./layout.module.css";
 
 export default function DashboardLayout({
     children,
@@ -7,9 +8,11 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className={styles.layout}>
+        <div className="flex min-h-screen bg-spare-bg">
             <Sidebar />
-            <main className={styles.main}>{children}</main>
+            <main className="flex-1 ml-64 overflow-y-auto">
+                {children}
+            </main>
         </div>
     );
 }

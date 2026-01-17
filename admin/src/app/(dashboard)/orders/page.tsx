@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { Card, StatusBadge } from "@/components/ui";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/types";
 import { mockOrders, formatCurrency, getCategoryLabel, formatTime } from "@/lib/mockData";
-import styles from "./page.module.css";
+import { Clock, CheckCircle, Package, DollarSign, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function OrdersPage() {
-    const [orders] = useState<Order[]>(mockOrders);
+    const [orders, setOrders] = useState<Order[]>(mockOrders);
     const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
     const filteredOrders = statusFilter
@@ -22,6 +25,25 @@ export default function OrdersPage() {
         cancelled: orders.filter(o => o.status === 'cancelled').length,
     };
 
+    const handleMarkPickedUp = (orderId: string) => {
+        setOrders(orders.map(o =>
+            o.id === orderId ? { ...o, status: "picked_up" as const, completedAt: new Date().toISOString() } : o
+        ));
+    };
+
+    const handleConfirmOrder = (orderId: string) => {
+        setOrders(orders.map(o =>
+            o.id === orderId ? { ...o, status: "confirmed" as const } : o
+        ));
+    };
+
+    const filters = [
+        { key: null, label: "All", count: orders.length },
+        { key: "reserved", label: "Reserved", count: statusCounts.reserved, color: "yellow" },
+        { key: "confirmed", label: "Confirmed", count: statusCounts.confirmed, color: "blue" },
+        { key: "picked_up", label: "Picked Up", count: statusCounts.picked_up, color: "green" },
+    ];
+
     return (
         <>
             <Header
@@ -29,98 +51,166 @@ export default function OrdersPage() {
                 subtitle="Today's pickups and reservations"
             />
 
-            <div className={styles.container}>
+            <div className="p-6 space-y-6">
                 {/* Status Filters */}
-                <div className={styles.statusFilters}>
-                    <button
-                        className={`${styles.statusFilter} ${statusFilter === null ? styles.active : ''}`}
-                        onClick={() => setStatusFilter(null)}
-                    >
-                        <span>All</span>
-                        <span className={styles.count}>{orders.length}</span>
-                    </button>
-                    <button
-                        className={`${styles.statusFilter} ${styles.reserved} ${statusFilter === 'reserved' ? styles.active : ''}`}
-                        onClick={() => setStatusFilter('reserved')}
-                    >
-                        <span>Reserved</span>
-                        <span className={styles.count}>{statusCounts.reserved}</span>
-                    </button>
-                    <button
-                        className={`${styles.statusFilter} ${styles.confirmed} ${statusFilter === 'confirmed' ? styles.active : ''}`}
-                        onClick={() => setStatusFilter('confirmed')}
-                    >
-                        <span>Confirmed</span>
-                        <span className={styles.count}>{statusCounts.confirmed}</span>
-                    </button>
-                    <button
-                        className={`${styles.statusFilter} ${styles.picked_up} ${statusFilter === 'picked_up' ? styles.active : ''}`}
-                        onClick={() => setStatusFilter('picked_up')}
-                    >
-                        <span>Picked Up</span>
-                        <span className={styles.count}>{statusCounts.picked_up}</span>
-                    </button>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                    {filters.map((filter) => (
+                        <Button
+                            key={filter.key ?? 'all'}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setStatusFilter(filter.key)}
+                            className={cn(
+                                "border-white/10 text-white hover:bg-white/5 whitespace-nowrap",
+                                statusFilter === filter.key && filter.key === null && "bg-accent/10 border-accent text-accent",
+                                statusFilter === filter.key && filter.key === "reserved" && "bg-yellow-500/10 border-yellow-500 text-yellow-500",
+                                statusFilter === filter.key && filter.key === "confirmed" && "bg-blue-500/10 border-blue-500 text-blue-500",
+                                statusFilter === filter.key && filter.key === "picked_up" && "bg-green-500/10 border-green-500 text-green-500"
+                            )}
+                        >
+                            {filter.label}
+                            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-white/10 text-xs">
+                                {filter.count}
+                            </span>
+                        </Button>
+                    ))}
                 </div>
 
                 {/* Summary Cards */}
-                <div className={styles.summaryRow}>
-                    <Card className={styles.summaryCard}>
-                        <span className={styles.summaryValue}>{orders.length}</span>
-                        <span className={styles.summaryLabel}>Total Orders</span>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Card className="bg-spare-bg-light border-white/5">
+                        <CardContent className="pt-6 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-pink/10 flex items-center justify-center">
+                                <Package className="w-6 h-6 text-pink" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-white">{orders.length}</p>
+                                <p className="text-sm text-muted-foreground">Total Orders</p>
+                            </div>
+                        </CardContent>
                     </Card>
-                    <Card className={styles.summaryCard}>
-                        <span className={`${styles.summaryValue} ${styles.pending}`}>
-                            {statusCounts.reserved + statusCounts.confirmed}
-                        </span>
-                        <span className={styles.summaryLabel}>Pending Pickup</span>
+                    <Card className="bg-spare-bg-light border-white/5">
+                        <CardContent className="pt-6 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                                <Clock className="w-6 h-6 text-yellow-500" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-yellow-500">
+                                    {statusCounts.reserved + statusCounts.confirmed}
+                                </p>
+                                <p className="text-sm text-muted-foreground">Pending</p>
+                            </div>
+                        </CardContent>
                     </Card>
-                    <Card className={styles.summaryCard}>
-                        <span className={`${styles.summaryValue} ${styles.success}`}>{statusCounts.picked_up}</span>
-                        <span className={styles.summaryLabel}>Completed</span>
+                    <Card className="bg-spare-bg-light border-white/5">
+                        <CardContent className="pt-6 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                                <CheckCircle className="w-6 h-6 text-green-500" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-green-500">{statusCounts.picked_up}</p>
+                                <p className="text-sm text-muted-foreground">Completed</p>
+                            </div>
+                        </CardContent>
                     </Card>
-                    <Card className={styles.summaryCard}>
-                        <span className={`${styles.summaryValue} ${styles.revenue}`}>
-                            {formatCurrency(orders.reduce((acc, o) => acc + o.price, 0))}
-                        </span>
-                        <span className={styles.summaryLabel}>Revenue</span>
+                    <Card className="bg-spare-bg-light border-white/5">
+                        <CardContent className="pt-6 flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                                <DollarSign className="w-6 h-6 text-accent" />
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-accent">
+                                    {formatCurrency(orders.reduce((acc, o) => acc + o.price, 0))}
+                                </p>
+                                <p className="text-sm text-muted-foreground">Revenue</p>
+                            </div>
+                        </CardContent>
                     </Card>
                 </div>
 
                 {/* Orders List */}
-                <div className={styles.ordersList}>
+                <div className="space-y-3">
                     {filteredOrders.map((order) => (
-                        <Card key={order.id} className={styles.orderCard}>
-                            <div className={styles.orderMain}>
-                                <div className={styles.orderCustomer}>
-                                    <span className={styles.customerName}>{order.consumerName}</span>
-                                    <span className={styles.orderCategory}>{getCategoryLabel(order.bagCategory)}</span>
+                        <Card key={order.id} className="bg-spare-bg-light border-white/5">
+                            <CardContent className="py-4">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                                            <User className="w-5 h-5 text-accent" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-white">{order.consumerName}</p>
+                                            <p className="text-sm text-pink">{getCategoryLabel(order.bagCategory)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-6 text-sm">
+                                        <div className="text-center">
+                                            <p className="text-muted-foreground">Pickup</p>
+                                            <p className="font-medium text-white">{formatTime(order.pickupTime)}</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-muted-foreground">Code</p>
+                                            <p className="font-mono font-medium text-accent">{order.pickupCode}</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-muted-foreground">Amount</p>
+                                            <p className="font-semibold text-accent">{formatCurrency(order.price)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <Badge
+                                            className={cn(
+                                                "border-0",
+                                                order.status === 'picked_up' && 'bg-green-500/20 text-green-500',
+                                                order.status === 'reserved' && 'bg-yellow-500/20 text-yellow-500',
+                                                order.status === 'confirmed' && 'bg-blue-500/20 text-blue-500',
+                                                order.status === 'cancelled' && 'bg-red-500/20 text-red-500'
+                                            )}
+                                        >
+                                            {order.status.replace('_', ' ')}
+                                        </Badge>
+
+                                        {order.status === 'reserved' && (
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="border-blue-500/50 text-blue-500 hover:bg-blue-500/10"
+                                                onClick={() => handleConfirmOrder(order.id)}
+                                            >
+                                                Confirm
+                                            </Button>
+                                        )}
+                                        {order.status === 'confirmed' && (
+                                            <Button
+                                                size="sm"
+                                                className="bg-green-500 hover:bg-green-600 text-white"
+                                                onClick={() => handleMarkPickedUp(order.id)}
+                                            >
+                                                Mark Picked Up
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className={styles.orderTime}>
-                                    <span className={styles.timeLabel}>Pickup</span>
-                                    <span className={styles.timeValue}>{formatTime(order.pickupTime)}</span>
-                                </div>
-                                <div className={styles.orderCode}>
-                                    <span className={styles.codeLabel}>Code</span>
-                                    <span className={styles.codeValue}>{order.pickupCode}</span>
-                                </div>
-                                <div className={styles.orderPrice}>
-                                    {formatCurrency(order.price)}
-                                </div>
-                                <StatusBadge status={order.status} size="sm" />
-                            </div>
-                            {order.feedback && (
-                                <div className={styles.orderFeedback}>
-                                    <span className={styles.rating}>★ {order.rating}</span>
-                                    <span className={styles.feedback}>&quot;{order.feedback}&quot;</span>
-                                </div>
-                            )}
+
+                                {order.feedback && (
+                                    <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-3">
+                                        <span className="text-yellow-500 font-medium">★ {order.rating}</span>
+                                        <span className="text-sm text-muted-foreground italic">&quot;{order.feedback}&quot;</span>
+                                    </div>
+                                )}
+                            </CardContent>
                         </Card>
                     ))}
 
                     {filteredOrders.length === 0 && (
-                        <div className={styles.emptyState}>
-                            <p>No orders found</p>
-                        </div>
+                        <Card className="bg-spare-bg-light border-white/5">
+                            <CardContent className="py-12 text-center">
+                                <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                                <p className="text-muted-foreground">No orders found</p>
+                            </CardContent>
+                        </Card>
                     )}
                 </div>
             </div>

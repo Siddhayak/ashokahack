@@ -1,51 +1,49 @@
 "use client";
 
-import React from "react";
-import { SearchInput } from "./ui";
-import styles from "./Header.module.css";
+import { Bell, Search, User } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
     title: string;
     subtitle?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
+export function Header({ title, subtitle }: HeaderProps) {
     return (
-        <header className={styles.header}>
-            <div className={styles.left}>
-                <h1 className={styles.title}>{title}</h1>
-                {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+        <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-spare-bg/80 backdrop-blur-sm sticky top-0 z-40">
+            <div>
+                <h1 className="text-xl font-semibold text-white">{title}</h1>
+                {subtitle && (
+                    <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
+                )}
             </div>
 
-            <div className={styles.right}>
+            <div className="flex items-center gap-4">
                 {/* Search */}
-                <div className={styles.search}>
-                    <SearchInput placeholder="Search..." />
+                <div className="relative hidden md:block">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                        type="search"
+                        placeholder="Search..."
+                        className="w-64 pl-9 bg-spare-bg-light border-white/10 focus:border-accent"
+                    />
                 </div>
 
                 {/* Notifications */}
-                <button className={styles.iconBtn} aria-label="Notifications">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 01-3.46 0" />
-                    </svg>
-                    <span className={styles.notificationDot} />
-                </button>
+                <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-white">
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-pink rounded-full" />
+                </Button>
 
                 {/* Profile */}
-                <button className={styles.profile}>
-                    <div className={styles.avatar}>
-                        <span>A</span>
+                <div className="flex items-center gap-3 pl-3 border-l border-white/10">
+                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+                        <User className="w-4 h-4 text-accent" />
                     </div>
-                    <div className={styles.profileInfo}>
-                        <span className={styles.profileName}>Admin User</span>
-                        <span className={styles.profileRole}>Super Admin</span>
-                    </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M6 9l6 6 6-6" />
-                    </svg>
-                </button>
+                    <span className="text-sm font-medium text-white hidden sm:block">Admin</span>
+                </div>
             </div>
         </header>
     );
-};
+}
