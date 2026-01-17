@@ -13,5 +13,22 @@ export type { DataTableProps, Column } from "./DataTable";
 export { Input, SearchInput } from "./input";
 export type { InputProps, SearchInputProps } from "./input";
 
+export {
+    Dialog,
+    DialogPortal,
+    DialogOverlay,
+    DialogTrigger,
+    DialogClose,
+    DialogContent,
+    DialogHeader,
+    DialogFooter,
+    DialogTitle,
+    DialogDescription,
+} from "./dialog";
+
+export { Label } from "./label";
+
+export { Switch } from "./switch";
+
 export { Modal, ConfirmDialog } from "./Modal";
 export type { ModalProps, ConfirmDialogProps } from "./Modal";
